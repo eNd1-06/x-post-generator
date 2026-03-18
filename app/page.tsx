@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Post = {
   content: string;
@@ -64,12 +65,17 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Header */}
       <div className="border-b border-slate-700 bg-slate-900/50 backdrop-blur">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center text-sm font-bold">X</div>
-          <div>
-            <h1 className="font-bold text-lg leading-tight">X 投稿文ジェネレーター</h1>
-            <p className="text-slate-400 text-xs">AIがあなたの投稿を自動生成</p>
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center text-sm font-bold">X</div>
+            <div>
+              <h1 className="font-bold text-lg leading-tight">X 投稿文ジェネレーター</h1>
+              <p className="text-slate-400 text-xs">AIがあなたの投稿を自動生成</p>
+            </div>
           </div>
+          <Link href="/seo" className="text-xs text-sky-400 hover:text-sky-300 transition-colors">
+            業種別テンプレート →
+          </Link>
         </div>
       </div>
 
