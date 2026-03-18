@@ -4,8 +4,63 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { industries, getIndustryBySlug } from "@/data/industries";
 import { tones, getToneBySlug } from "@/data/tones";
+
+type SamplePost = {
+  content: string;
+  hashtags: string[];
+  angle: string;
+};
+
+// ビルド時にGemini APIでサンプル投稿文を生成する
+async function generateSamplePosts(
+  theme: string,
+  toneLabel: string
+): Promise<SamplePost[]> {
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(
+      `X（Twitter）の投稿文を3パターン作成してください。
+
+テーマ・業種: ${theme}
+口調: ${toneLabel}口調
+
+条件:
+- 各投稿は140文字以内（日本語）
+- ハッシュタグを2〜3個含める
+- エンゲージメントを高める内容にする
+- 各パターンは異なるアプローチで
+
+以下のJSON形式のみで返答してください（説明文・コードブロック不要）:
+{
+  "posts": [
+    {
+      "content": "投稿文（ハッシュタグ含む）",
+      "hashtags": ["#タグ1", "#タグ2"],
+      "angle": "このパターンの特徴（例: 共感型、問いかけ型など）"
+    }
+  ]
+}`
+    );
+    const text = result.response.text();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return [];
+    const parsed = JSON.parse(jsonMatch[0]);
+    return parsed.posts || [];
+  } catch {
+    return [];
+  }
+}
+
+const toneMap: Record<string, string> = {
+  professional: "プロフェッショナルで信頼感のある",
+  casual: "親しみやすくカジュアルな",
+  inspiring: "モチベーションを高める力強い",
+  educational: "わかりやすく教育的な",
+};
 
 type Props = {
   params: Promise<{
@@ -69,6 +124,10 @@ export default async function IndustryTonePage({ params }: Props) {
   if (!industry || !tone) {
     notFound();
   }
+
+  // ビルド時にGemini APIでサンプル投稿文を生成
+  const toneLabel = toneMap[toneSlug] || "自然な";
+  const samplePosts = await generateSamplePosts(industry.exampleTheme, toneLabel);
 
   // 同業種の他口調ページへの関連リンクを取得（現在の口調を除く）
   const relatedTones = tones.filter((t) => t.slug !== toneSlug);
@@ -179,6 +238,40 @@ export default async function IndustryTonePage({ params }: Props) {
               入力例: <span className="text-slate-300 italic">「{industry.exampleTheme}」</span>
             </p>
           </div>
+
+          {/* サンプル投稿文 */}
+          {samplePosts.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="font-bold text-slate-200 text-lg">
+                {industry.name}の{tone.name}な投稿文サンプル
+              </h2>
+              <p className="text-slate-400 text-sm">
+                AIが生成した実際の投稿文例です。そのままコピーしてご利用いただけます。
+              </p>
+              <div className="space-y-3">
+                {samplePosts.map((post, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-800/60 rounded-2xl p-5 border border-slate-700"
+                  >
+                    <span className="inline-block bg-sky-500/20 text-sky-300 text-xs font-medium px-2.5 py-1 rounded-full mb-3">
+                      {post.angle}
+                    </span>
+                    <p className="text-white leading-relaxed whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {post.hashtags.map((tag) => (
+                        <span key={tag} className="text-sky-400 text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* CTAボタン */}
           <div className="text-center py-4">
