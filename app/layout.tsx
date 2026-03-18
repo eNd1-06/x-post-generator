@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   description:
     "AIがX（Twitter）の投稿文を自動生成。業種・テーマ・口調を選ぶだけで140文字以内の投稿文をすぐに作成できます。無料・登録不要。",
   keywords: ["X投稿文", "Twitter投稿", "AI生成", "投稿文ジェネレーター", "SNS"],
+  verification: {
+    google: "X6orpG-UcJpIZWQ8kOvac6XrXv7_GocQWCtvzKjtPw0",
+  },
 };
 
 export default function RootLayout({
