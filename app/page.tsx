@@ -203,6 +203,14 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <div className="border-t border-slate-700 mt-8">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-center gap-6 text-xs text-slate-500">
+          <Link href="/privacy" className="hover:text-slate-300 transition-colors">プライバシーポリシー</Link>
+          <Link href="/seo" className="hover:text-slate-300 transition-colors">業種別テンプレート</Link>
+        </div>
+      </div>
     </main>
   );
 }
